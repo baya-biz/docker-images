@@ -1,4 +1,6 @@
-FROM ubuntu:20.04
+FROM --platform=$BUILDPLATFORM ubuntu:20.04
+
+ARG TARGETOS TARGETARCH
 
 WORKDIR /workspaces/install
 
@@ -11,15 +13,8 @@ RUN apt update && \
       apt install -y \
             build-essential curl git lsb-release gnupg unzip vim
 
-# Add Github CLI registry.
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-RUN echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-RUN apt update && \
-      apt upgrade && \
-      apt install -y gh
-
 # Install awscli v2.
-RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+RUN curl "https://awscli.amazonaws.com/awscli-exe-${TARGETOS}-${TARGETARCH}.zip" -o "awscliv2.zip"
 RUN unzip awscliv2.zip && \
       ./aws/install && \
       rm -rf ./aws ./awscliv2.zip
@@ -30,5 +25,11 @@ RUN apt install nodejs && \
       npm i -g pnpm && \
       pnpm add -g @microsoft/rush
 
-# Install SOPS.
-RUN gh release download v3.7.2 -R mozilla/sops
+# Install goreman.
+RUN curl "https://github.com/mattn/goreman/releases/download/v0.3.11/goreman_v0.3.11_${TARGETOS}_${TARGETARCH}.tar.gz" -o "goreman.zip"
+RUN tar -xvf goreman.tar.gz && \
+      mv ./goreman_v0.3.11_${TARGETOS}_${TARGETARCH}/goreman goreman && \
+      rm -rf ./goreman.zip ./goreman_v0.3.11_${TARGETOS}_${TARGETARCH}
+
+# Install sops.
+RUN curl "https://github.com/mozilla/sops/releases/download/v3.7.2/sops-v3.7.2.${TARGETOS}.${TARGETARCH}" -o "sops"
