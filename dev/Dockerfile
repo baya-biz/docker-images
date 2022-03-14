@@ -25,3 +25,6 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt install nodejs && \
       npm i -g pnpm && \
       pnpm add -g @microsoft/rush
+
+# Install SOPS.
+RUN gh release download v3.7.2 -R mozilla/sops
